@@ -1,6 +1,8 @@
 import json
 from typing import List
 from fastapi import FastAPI
+# 1. Import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware 
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from groq import Groq
@@ -14,19 +16,33 @@ app = FastAPI(
     description="Streams Groq LLM responses to a Streamlit frontend using true SSE",
     version="2.0.0"
 )
+
+# 2. Add CORS Middleware to allow requests from your UI
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins; change to your specific UI URL in production
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows POST, GET, OPTIONS, etc.
+    allow_headers=["*"],  # Allows Content-Type, Authorization, etc.
+)
+
 app.include_router(chat_router)
 app.include_router(llm_router)
 app.include_router(user_router)
 
 client = Groq(api_key=GROQ_API_KEY)
+
 class ChatMessage(BaseModel):
     role: str
     content: str
+
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
+
 @app.get("/")
 def home():
     return {"message": "FastAPI SSE backend is running."}
+
 @app.post("/stream")
 def stream_response(request: ChatRequest):
     def generate():
@@ -51,6 +67,7 @@ def stream_response(request: ChatRequest):
             "X-Accel-Buffering": "no", 
         },
     )
+
 @app.post("/generate")
 def generate_response(request: ChatRequest):
     response = client.chat.completions.create(
@@ -60,12 +77,3 @@ def generate_response(request: ChatRequest):
         max_tokens=500,
     )
     return {"response": response.choices[0].message.content}  
-    
-    
-    
-    
-    
-    
-    
-    
-    
