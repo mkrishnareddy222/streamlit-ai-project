@@ -9,6 +9,3 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME") 
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 BACKEND_STREAM_URL = os.getenv("BACKEND_STREAM_URL")
-
-#MODEL_NAME = 'qwen/qwen3.6-27b'
-#ENVIRONMENT = 'development'
